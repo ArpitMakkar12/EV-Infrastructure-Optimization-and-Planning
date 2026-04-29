@@ -1,12 +1,458 @@
 <!DOCTYPE html>
-<html>
-<head><title>EV Infrastructure Maps</title></head>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>EV Infrastructure — Visualization Hub</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #060b14;
+      --surface: #0d1a2a;
+      --card: #0f2236;
+      --border: rgba(0, 200, 140, 0.15);
+      --accent: #00c88c;
+      --accent2: #00a8ff;
+      --accent3: #7b61ff;
+      --text: #e8f4f0;
+      --muted: #6b8fa8;
+      --heading: 'Syne', sans-serif;
+      --body: 'DM Sans', sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--body);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── Grid background ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(0,200,140,.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,200,140,.04) 1px, transparent 1px);
+      background-size: 48px 48px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── Glow orbs ── */
+    .orb {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(120px);
+      pointer-events: none;
+      z-index: 0;
+    }
+    .orb-1 { width: 600px; height: 600px; background: rgba(0,200,140,.07); top: -150px; left: -150px; }
+    .orb-2 { width: 500px; height: 500px; background: rgba(0,168,255,.06); bottom: -100px; right: -100px; }
+    .orb-3 { width: 300px; height: 300px; background: rgba(123,97,255,.05); top: 40%; left: 50%; transform: translate(-50%,-50%); }
+
+    /* ── Nav ── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.2rem 3rem;
+      background: rgba(6,11,20,.7);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-logo {
+      font-family: var(--heading);
+      font-weight: 800;
+      font-size: 1.1rem;
+      letter-spacing: -.01em;
+      color: var(--text);
+    }
+    .nav-logo span { color: var(--accent); }
+    .nav-badge {
+      font-size: .72rem;
+      font-family: var(--body);
+      font-weight: 500;
+      color: var(--accent);
+      background: rgba(0,200,140,.1);
+      border: 1px solid rgba(0,200,140,.3);
+      padding: .25rem .7rem;
+      border-radius: 999px;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+    }
+
+    /* ── Main wrapper ── */
+    main {
+      position: relative;
+      z-index: 1;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 2rem 6rem;
+    }
+
+    /* ── Hero ── */
+    .hero {
+      padding: 160px 0 80px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: end;
+      gap: 2rem;
+    }
+    .hero-label {
+      font-size: .75rem;
+      font-weight: 500;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 1.2rem;
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+    }
+    .hero-label::before {
+      content: '';
+      display: inline-block;
+      width: 24px; height: 2px;
+      background: var(--accent);
+    }
+    h1 {
+      font-family: var(--heading);
+      font-size: clamp(2.8rem, 5vw, 4.4rem);
+      font-weight: 800;
+      line-height: 1.05;
+      letter-spacing: -.03em;
+      color: var(--text);
+    }
+    h1 .highlight {
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero-sub {
+      margin-top: 1.4rem;
+      font-size: 1.05rem;
+      font-weight: 300;
+      line-height: 1.75;
+      color: var(--muted);
+      max-width: 520px;
+    }
+    .hero-stats {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      align-items: flex-end;
+    }
+    .stat-pill {
+      background: rgba(0,200,140,.06);
+      border: 1px solid rgba(0,200,140,.2);
+      border-radius: 12px;
+      padding: .9rem 1.4rem;
+      text-align: right;
+      animation: fadeUp .8s ease both;
+    }
+    .stat-pill:nth-child(2) { animation-delay: .15s; }
+    .stat-pill:nth-child(3) { animation-delay: .3s; }
+    .stat-num {
+      font-family: var(--heading);
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: var(--accent);
+      line-height: 1;
+    }
+    .stat-label { font-size: .72rem; color: var(--muted); margin-top: .25rem; letter-spacing: .05em; text-transform: uppercase; }
+
+    /* ── Section title ── */
+    .section-title {
+      font-family: var(--heading);
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--muted);
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      margin-bottom: 2rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .section-title::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* ── Cards grid ── */
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 2rem;
+      text-decoration: none;
+      color: inherit;
+      display: flex;
+      flex-direction: column;
+      gap: 1.2rem;
+      position: relative;
+      overflow: hidden;
+      transition: transform .3s ease, border-color .3s ease, box-shadow .3s ease;
+      animation: fadeUp .7s ease both;
+    }
+    .card:nth-child(2) { animation-delay: .12s; }
+    .card:nth-child(3) { animation-delay: .24s; }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(0,200,140,.04), transparent 60%);
+      opacity: 0;
+      transition: opacity .3s;
+    }
+    .card:hover { transform: translateY(-6px); border-color: rgba(0,200,140,.4); box-shadow: 0 24px 60px rgba(0,200,140,.08); }
+    .card:hover::before { opacity: 1; }
+
+    .card-icon {
+      width: 52px; height: 52px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+    }
+    .icon-green { background: rgba(0,200,140,.12); }
+    .icon-blue  { background: rgba(0,168,255,.12); }
+    .icon-purple{ background: rgba(123,97,255,.12); }
+
+    .card-tag {
+      font-size: .68rem;
+      font-weight: 500;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      padding: .25rem .65rem;
+      border-radius: 999px;
+      align-self: flex-start;
+    }
+    .tag-green  { background: rgba(0,200,140,.1); color: var(--accent); border: 1px solid rgba(0,200,140,.25); }
+    .tag-blue   { background: rgba(0,168,255,.1); color: var(--accent2); border: 1px solid rgba(0,168,255,.25); }
+    .tag-purple { background: rgba(123,97,255,.1); color: var(--accent3); border: 1px solid rgba(123,97,255,.25); }
+
+    .card-title {
+      font-family: var(--heading);
+      font-size: 1.22rem;
+      font-weight: 700;
+      line-height: 1.3;
+      color: var(--text);
+    }
+    .card-desc {
+      font-size: .9rem;
+      font-weight: 300;
+      line-height: 1.7;
+      color: var(--muted);
+      flex: 1;
+    }
+    .card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border);
+    }
+    .card-meta { font-size: .75rem; color: var(--muted); letter-spacing: .03em; }
+    .card-arrow {
+      width: 36px; height: 36px;
+      border-radius: 10px;
+      background: rgba(0,200,140,.08);
+      border: 1px solid rgba(0,200,140,.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--accent);
+      font-size: 1rem;
+      transition: background .3s, transform .3s;
+    }
+    .card:hover .card-arrow { background: var(--accent); color: #060b14; transform: rotate(45deg); }
+
+    /* ── Info strip ── */
+    .info-strip {
+      margin-top: 4rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 2rem 2.5rem;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2rem;
+    }
+    .info-item { display: flex; align-items: flex-start; gap: 1rem; }
+    .info-icon {
+      width: 40px; height: 40px;
+      border-radius: 10px;
+      background: rgba(0,200,140,.08);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      flex-shrink: 0;
+      margin-top: .1rem;
+    }
+    .info-title { font-family: var(--heading); font-size: .95rem; font-weight: 700; margin-bottom: .3rem; }
+    .info-text { font-size: .82rem; color: var(--muted); line-height: 1.6; }
+
+    /* ── Footer ── */
+    footer {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      padding: 2rem;
+      border-top: 1px solid var(--border);
+      font-size: .8rem;
+      color: var(--muted);
+    }
+    footer a { color: var(--accent); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+
+    /* ── Animations ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(28px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .hero { animation: fadeUp .9s ease both; }
+
+    /* ── Responsive ── */
+    @media (max-width: 768px) {
+      nav { padding: 1rem 1.4rem; }
+      .hero { grid-template-columns: 1fr; padding: 120px 0 60px; }
+      .hero-stats { flex-direction: row; align-items: flex-start; }
+      .info-strip { grid-template-columns: 1fr; }
+      .cards { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
 <body>
-  <h1>EV Infrastructure Visualization Maps</h1>
-  <ul>
-    <li><a href="Visualization-Maps/EV-Infrastructure-Model/EV_Scenario_Map.html">EV Scenario Map</a></li>
-    <li><a href="Visualization-Maps/EV-Infrastructure-Model/Enhanced_EV_Map_v2.html">Enhanced EV Map v2</a></li>
-    <li><a href="Visualization-Maps/EV-Indian-Adaptation/India_Hyderabad_EV_Map.html">India Hyderabad EV Map</a></li>
-  </ul>
+
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+
+  <!-- Nav -->
+  <nav>
+    <div class="nav-logo">EV<span>.</span>Infra</div>
+    <span class="nav-badge">ArpitMakkar12</span>
+  </nav>
+
+  <main>
+    <!-- Hero -->
+    <section class="hero">
+      <div>
+        <p class="hero-label">Visualization Hub</p>
+        <h1>EV Infrastructure<br><span class="highlight">Optimization</span><br>& Planning</h1>
+        <p class="hero-sub">
+          Interactive geospatial maps and scenario models for electric vehicle
+          charging network analysis — from global models to India-specific deployments.
+        </p>
+      </div>
+      <div class="hero-stats">
+        <div class="stat-pill">
+          <div class="stat-num">3</div>
+          <div class="stat-label">Live Maps</div>
+        </div>
+        <div class="stat-pill">
+          <div class="stat-num">2</div>
+          <div class="stat-label">Model Types</div>
+        </div>
+        <div class="stat-pill">
+          <div class="stat-num">IND</div>
+          <div class="stat-label">Focus Region</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Cards -->
+    <p class="section-title">Interactive Maps</p>
+    <div class="cards">
+
+      <a class="card" href="Visualization-Maps/EV-Infrastructure-Model/EV_Scenario_Map.html">
+        <div class="card-icon icon-green">🗺️</div>
+        <span class="card-tag tag-green">Scenario Model</span>
+        <div class="card-title">EV Scenario Map</div>
+        <p class="card-desc">Explore multi-scenario EV infrastructure projections with interactive overlays for charging demand, coverage gaps, and optimal placement zones.</p>
+        <div class="card-footer">
+          <span class="card-meta">EV-Infrastructure-Model</span>
+          <div class="card-arrow">↗</div>
+        </div>
+      </a>
+
+      <a class="card" href="Visualization-Maps/EV-Infrastructure-Model/Enhanced_EV_Map_v2.html">
+        <div class="card-icon icon-blue">⚡</div>
+        <span class="card-tag tag-blue">Enhanced v2</span>
+        <div class="card-title">Enhanced EV Map</div>
+        <p class="card-desc">Second-generation visualization with improved clustering algorithms, real-time filter controls, and an upgraded charger density heatmap layer.</p>
+        <div class="card-footer">
+          <span class="card-meta">EV-Infrastructure-Model</span>
+          <div class="card-arrow">↗</div>
+        </div>
+      </a>
+
+      <a class="card" href="Visualization-Maps/EV-Indian-Adaptation/India_Hyderabad_EV_Map.html">
+        <div class="card-icon icon-purple">🇮🇳</div>
+        <span class="card-tag tag-purple">India Adaptation</span>
+        <div class="card-title">Hyderabad EV Map</div>
+        <p class="card-desc">India-specific adaptation of the EV infrastructure model, focused on Hyderabad's urban grid — integrating local road topology and demand patterns.</p>
+        <div class="card-footer">
+          <span class="card-meta">EV-Indian-Adaptation</span>
+          <div class="card-arrow">↗</div>
+        </div>
+      </a>
+
+    </div>
+
+    <!-- Info strip -->
+    <div class="info-strip">
+      <div class="info-item">
+        <div class="info-icon">🔬</div>
+        <div>
+          <div class="info-title">Research-Grade Models</div>
+          <div class="info-text">Optimisation algorithms trained on real-world EV adoption datasets and road network topology.</div>
+        </div>
+      </div>
+      <div class="info-item">
+        <div class="info-icon">📍</div>
+        <div>
+          <div class="info-title">Geospatial Precision</div>
+          <div class="info-text">Folium & Leaflet powered maps with layered overlays for granular infrastructure insight.</div>
+        </div>
+      </div>
+      <div class="info-item">
+        <div class="info-icon">🇮🇳</div>
+        <div>
+          <div class="info-title">India-First Focus</div>
+          <div class="info-text">Dedicated Indian city adaptation beginning with Hyderabad, built for local context and scale.</div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    Built by <a href="https://github.com/ArpitMakkar12" target="_blank">ArpitMakkar12</a> &nbsp;·&nbsp;
+    <a href="https://github.com/ArpitMakkar12/EV-Infrastructure-Optimization-and-Planning" target="_blank">View on GitHub</a>
+  </footer>
+
 </body>
 </html>
