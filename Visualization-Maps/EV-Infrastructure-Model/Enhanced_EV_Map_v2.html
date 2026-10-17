@@ -199,14 +199,13 @@
         
     
             var tile_layer_bba0540a5af51fe902593247a7b2b984 = L.tileLayer(
-                "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
+                "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}",
                 {
   "minZoom": 0,
   "maxZoom": 20,
-  "maxNativeZoom": 20,
+  "maxNativeZoom": 16,
   "noWrap": false,
-  "attribution": "EV Infrastructure Planning",
-  "subdomains": "abcd",
+  "attribution": "Tiles &copy; Esri &mdash; Esri, HERE, Garmin, &copy; OpenStreetMap contributors | EV Infrastructure Planning",
   "detectRetina": false,
   "tms": false,
   "opacity": 1,
@@ -216,6 +215,7 @@
         
     
             tile_layer_bba0540a5af51fe902593247a7b2b984.addTo(map_80b22b3fee4555410b1d011af801ae54);
+            L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}", {"maxNativeZoom": 16, "maxZoom": 20, "zIndex": 2}).addTo(map_80b22b3fee4555410b1d011af801ae54);
         
     
             L.control.fullscreen(
@@ -56915,7 +56915,7 @@
     
             var layer_control_7f303ecce24d49f60b4e27a5e7c00b48_layers = {
                 base_layers : {
-                    "cartodbdarkmatter" : tile_layer_bba0540a5af51fe902593247a7b2b984,
+                    "Dark basemap" : tile_layer_bba0540a5af51fe902593247a7b2b984,
                 },
                 overlays :  {
                     "AI Demand Heatmap" : feature_group_6eec8ad92e3757f8f2a2d4673da91700,
