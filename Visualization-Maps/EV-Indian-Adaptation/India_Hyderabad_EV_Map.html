@@ -233,14 +233,13 @@
         
     
             var tile_layer_84a3cca478e1903537696f237bc1db2b = L.tileLayer(
-                "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
+                "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}",
                 {
   "minZoom": 0,
   "maxZoom": 20,
-  "maxNativeZoom": 20,
+  "maxNativeZoom": 16,
   "noWrap": false,
-  "attribution": "EV Infrastructure Planning \u2014 India",
-  "subdomains": "abcd",
+  "attribution": "Tiles &copy; Esri &mdash; Esri, HERE, Garmin, &copy; OpenStreetMap contributors | EV Infrastructure Planning \u2014 India",
   "detectRetina": false,
   "tms": false,
   "opacity": 1,
@@ -250,6 +249,7 @@
         
     
             tile_layer_84a3cca478e1903537696f237bc1db2b.addTo(map_1534533b5d109b224feb7674cfd416c0);
+            L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}", {"maxNativeZoom": 16, "maxZoom": 20, "zIndex": 2}).addTo(map_1534533b5d109b224feb7674cfd416c0);
         
     
             L.control.fullscreen(
@@ -11740,7 +11740,7 @@
     
             var layer_control_29f5e184dced7d49e206e53faf7680fc_layers = {
                 base_layers : {
-                    "cartodbdarkmatter" : tile_layer_84a3cca478e1903537696f237bc1db2b,
+                    "Dark basemap" : tile_layer_84a3cca478e1903537696f237bc1db2b,
                 },
                 overlays :  {
                     "AI Demand Heatmap (India)" : feature_group_845fe9c79b8da606bfdfdb58d5adcf52,
